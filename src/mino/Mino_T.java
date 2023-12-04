@@ -1,8 +1,13 @@
 package mino;
 
-public class Mino_T {
+import java.awt.*;
+
+public class Mino_T extends Mino {
     /*
     ██████
       ██
      */
+    public Mino_T() {
+        create(Color.PINK);
+    }
 }
