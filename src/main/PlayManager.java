@@ -7,16 +7,22 @@ import mino.Mino_L;
 import java.awt.*;
 
 public class PlayManager {
+
+    // Variables for the different Segments of the Game such as the "Play" Window and the "Next" Window etc.
     public static int left_x;
     public static int right_x;
     public static int top_y;
     public static int bottom_y;
     final int WIDTH = 360;
     final int HEIGHT = 600;
+
+    // Variables for the Mino
     final int MINO_START_X;
     final int MINO_START_Y;
-    // Pop them Minos dawg
     Mino currentMino;
+
+    // Miscellaneous
+    public static int dropInterval = 240; // Mino drops every 240 Frames (1 Second).
 
     public PlayManager() {
 

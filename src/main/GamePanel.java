@@ -17,6 +17,10 @@ public class GamePanel extends JPanel implements Runnable {
         this.setBackground(Color.BLACK);
         this.setLayout(null);
 
+        // add KeyListener
+        this.addKeyListener(new KeyHandler());
+        this.setFocusable(true);
+
         playManager = new PlayManager();
     }
 
