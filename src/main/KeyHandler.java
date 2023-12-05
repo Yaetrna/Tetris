@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
-    public static boolean upPressed, leftPressed, downPressed, rightPressed;
+    public static boolean upPressed, leftPressed, downPressed, rightPressed, pausePressed;
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -21,6 +21,9 @@ public class KeyHandler implements KeyListener {
         }
         if (key_press == KeyEvent.VK_D) {
             rightPressed = true;
+        }
+        if (key_press == KeyEvent.VK_ESCAPE) {
+            pausePressed = !pausePressed;
         }
         // TODO: Add more keys like Up, Left, Down, Right, Spacebar etc.
     }

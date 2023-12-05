@@ -8,8 +8,12 @@ import java.awt.*;
 public class Mino {
     public Block[] b = new Block[4];
     public Block[] tempB = new Block[4];
+    public boolean active = true;
     int autoDropCounter = 0;
     int direction = 1;
+    boolean leftCollision, rightCollision, bottomCollision;
+    public boolean collisionTimeMargin;
+    int collisionTimeCounter = 0;
 
     public void create(Color c) {
         b[0] = new Block(c);
@@ -27,15 +31,19 @@ public class Mino {
     }
 
     public void updateXY(int direction) {
-        this.direction = direction;
-        b[0].x = tempB[0].x;
-        b[0].y = tempB[0].y;
-        b[1].x = tempB[1].x;
-        b[1].y = tempB[1].y;
-        b[2].x = tempB[2].x;
-        b[2].y = tempB[2].y;
-        b[3].x = tempB[3].x;
-        b[3].y = tempB[3].y;
+
+        checkRotationCollision();
+        if (!(leftCollision || rightCollision || bottomCollision)) {
+            this.direction = direction;
+            b[0].x = tempB[0].x;
+            b[0].y = tempB[0].y;
+            b[1].x = tempB[1].x;
+            b[1].y = tempB[1].y;
+            b[2].x = tempB[2].x;
+            b[2].y = tempB[2].y;
+            b[3].x = tempB[3].x;
+            b[3].y = tempB[3].y;
+        }
     }
 
     public void getDirection1() {
@@ -54,8 +62,110 @@ public class Mino {
 
     }
 
+    public void checkMovementCollision() {
+        leftCollision = false;
+        rightCollision = false;
+        bottomCollision = false;
+
+        // Check static block collision
+        checkStaticBlockCollision();
+
+        // Check Collision
+
+        // Left Wall
+        for (Block block : b) {
+            if (block.x == PlayManager.left_x) {
+                leftCollision = true;
+                break;
+            }
+        }
+
+        // Right Wall
+        for (Block block : b) {
+            if (block.x + Block.SIZE == PlayManager.right_x) {
+                rightCollision = true;
+                break;
+            }
+        }
+
+        // Bottom Floor
+        for (Block block : b) {
+            if (block.y + Block.SIZE == PlayManager.bottom_y) {
+                bottomCollision = true;
+                break;
+            }
+        }
+    }
+
+    public void checkRotationCollision() {
+        leftCollision = false;
+        rightCollision = false;
+        bottomCollision = false;
+
+        // Check static block collision
+        checkStaticBlockCollision();
+
+        // Check Collision
+
+        // Left Wall
+        for (Block block : tempB) {
+            if (block.x < PlayManager.left_x) {
+                leftCollision = true;
+                break;
+            }
+        }
+
+        // Right Wall
+        for (Block block : tempB) {
+            if (block.x + Block.SIZE > PlayManager.right_x) {
+                rightCollision = true;
+                break;
+            }
+        }
+
+        // Bottom Floor
+        for (Block block : tempB) {
+            if (block.y + Block.SIZE > PlayManager.bottom_y) {
+                bottomCollision = true;
+                break;
+            }
+        }
+    }
+
+    public void checkStaticBlockCollision() {
+        for (Block staticBlock : PlayManager.staticBlocks) {
+            int targetX = staticBlock.x;
+            int targetY = staticBlock.y;
+            // Check below
+            for (Block block : b) {
+                if (block.y + Block.SIZE == targetY && block.x == targetX) {
+                    bottomCollision = true;
+                    break;
+                }
+            }
+            // Check left
+            for (Block block : b) {
+                if (block.x - Block.SIZE == targetX && block.y == targetY) {
+                    leftCollision = true;
+                    break;
+                }
+            }
+            // Check right
+            for (Block block : b) {
+                if (block.x + Block.SIZE == targetX && block.y == targetY) {
+                    rightCollision = true;
+                    break;
+                }
+            }
+        }
+    }
 
     public void update() {
+
+        if (collisionTimeMargin) {
+            collisionTimer();
+        }
+
         // Movement for the Mino
         if (KeyHandler.upPressed) {
             switch (direction) {
@@ -66,40 +176,67 @@ public class Mino {
             }
             KeyHandler.upPressed = false;
         }
+
+        checkMovementCollision();
+
         if (KeyHandler.leftPressed) {
-            b[0].x -= Block.SIZE;
-            b[1].x -= Block.SIZE;
-            b[2].x -= Block.SIZE;
-            b[3].x -= Block.SIZE;
+            if (!leftCollision) {
+                b[0].x -= Block.SIZE;
+                b[1].x -= Block.SIZE;
+                b[2].x -= Block.SIZE;
+                b[3].x -= Block.SIZE;
+            }
 
             KeyHandler.leftPressed = false;
         }
         if (KeyHandler.downPressed) {
-            b[0].y += Block.SIZE;
-            b[1].y += Block.SIZE;
-            b[2].y += Block.SIZE;
-            b[3].y += Block.SIZE;
-            autoDropCounter = 0;
+            if (!bottomCollision) {
+                b[0].y += Block.SIZE;
+                b[1].y += Block.SIZE;
+                b[2].y += Block.SIZE;
+                b[3].y += Block.SIZE;
+                autoDropCounter = 0;
+            }
 
             KeyHandler.downPressed = false;
         }
         if (KeyHandler.rightPressed) {
-            b[0].x += Block.SIZE;
-            b[1].x += Block.SIZE;
-            b[2].x += Block.SIZE;
-            b[3].x += Block.SIZE;
+            if (!rightCollision) {
+                b[0].x += Block.SIZE;
+                b[1].x += Block.SIZE;
+                b[2].x += Block.SIZE;
+                b[3].x += Block.SIZE;
+            }
 
             KeyHandler.rightPressed = false;
         }
 
-        autoDropCounter++; // Increase the counter every Frame until it reaches 240 (FPS).
-        if (autoDropCounter >= PlayManager.dropInterval) {
-            // Every 240 Frames the Mino goes down by 1. Block (30 Pixel).
-            b[0].y += Block.SIZE;
-            b[1].y += Block.SIZE;
-            b[2].y += Block.SIZE;
-            b[3].y += Block.SIZE;
-            autoDropCounter = 0;
+        if (bottomCollision) {
+            collisionTimeMargin = true;
+        } else {
+            autoDropCounter++; // Increase the counter every Frame until it reaches 240 (FPS).
+            if (autoDropCounter >= PlayManager.dropInterval) {
+                // Every 240 Frames the Mino goes down by 1. Block (30 Pixel).
+                b[0].y += Block.SIZE;
+                b[1].y += Block.SIZE;
+                b[2].y += Block.SIZE;
+                b[3].y += Block.SIZE;
+                autoDropCounter = 0;
+            }
+        }
+    }
+
+    private void collisionTimer() {
+        collisionTimeCounter++;
+
+        // Wait FPS * 0.75 (180FPS)
+        if (collisionTimeCounter == 180) {
+            collisionTimeCounter = 0;
+            // Check if the piece still touches something.
+            checkMovementCollision();
+            if (bottomCollision) {
+                active = false;
+            }
         }
     }
 
