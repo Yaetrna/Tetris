@@ -9,7 +9,8 @@ public class Mino_J extends Mino {
     ████
      */
     public Mino_J() {
-        create(Color.BLUE);
+        // Changed color from Blue to Pink because of very, very stupid story.
+        create(Color.PINK);
     }
 
     public void setXY(int x, int y) {
@@ -22,6 +23,7 @@ public class Mino_J extends Mino {
         b[3].x = b[0].x - Block.SIZE;
         b[3].y = b[0].y + Block.SIZE;
     }
+
     public void getDirection1() {
         /*
           ██
