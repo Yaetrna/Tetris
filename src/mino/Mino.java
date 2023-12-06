@@ -9,10 +9,10 @@ public class Mino {
     public Block[] b = new Block[4];
     public Block[] tempB = new Block[4];
     public boolean active = true;
+    public boolean collisionTimeMargin;
     int autoDropCounter = 0;
     int direction = 1;
     boolean leftCollision, rightCollision, bottomCollision;
-    public boolean collisionTimeMargin;
     int collisionTimeCounter = 0;
 
     public void create(Color c) {
