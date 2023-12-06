@@ -107,9 +107,21 @@ public class PlayManager {
             if (x == right_x) {
 
                 // If the blockCount reaches 12 which is the maximum number of Blocks that can be in 1 Row.
-                // Then
+                // Then delete that row.
                 if (blockCount == 12) {
+                    for (int i = staticBlocks.size() - 1; i > -1; i--) {
+                        // Remove all Blocks in current y-Line
+                        if (staticBlocks.get(i).y == y) {
+                            staticBlocks.remove(i);
+                        }
+                    }
 
+                    // If a line has been deleted, then all Blocks above it have to be shifted down.
+                    for (Block staticBlock : staticBlocks) {
+                        if (staticBlock.y < y) {
+                            staticBlock.y += Block.SIZE;
+                        }
+                    }
                 }
 
                 blockCount = 0;
