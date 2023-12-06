@@ -229,8 +229,8 @@ public class Mino {
     private void collisionTimer() {
         collisionTimeCounter++;
 
-        // Wait FPS * 0.75 (180FPS)
-        if (collisionTimeCounter == 180) {
+        // Wait FPS * 0.5 (120FPS)
+        if (collisionTimeCounter == 120) {
             collisionTimeCounter = 0;
             // Check if the piece still touches something.
             checkMovementCollision();

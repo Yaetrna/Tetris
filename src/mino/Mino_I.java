@@ -25,6 +25,12 @@ public class Mino_I extends Mino {
     }
 
     public void getDirection1() {
+        /*
+        ██
+        ██
+        ██
+        ██
+        */
         tempB[0].x = b[0].x;
         tempB[0].y = b[0].y;
         tempB[1].x = b[0].x - Block.SIZE;
@@ -38,6 +44,9 @@ public class Mino_I extends Mino {
     }
 
     public void getDirection2() {
+        /*
+        ████████
+        */
         tempB[0].x = b[0].x;
         tempB[0].y = b[0].y;
         tempB[1].x = b[0].x;
