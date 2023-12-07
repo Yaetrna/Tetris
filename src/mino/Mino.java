@@ -12,7 +12,7 @@ public class Mino {
     public boolean collisionTimeMargin;
     int autoDropCounter = 0;
     int direction = 1;
-    boolean leftCollision, rightCollision, bottomCollision;
+    boolean leftCollision, rightCollision, bottomCollision, instantDrop, aggressiveMovement;
     int collisionTimeCounter = 0;
 
     public void create(Color c) {
@@ -210,6 +210,17 @@ public class Mino {
 
             KeyHandler.rightPressed = false;
         }
+        if (KeyHandler.dropPressed) {
+            while (!bottomCollision) {
+                b[0].y += Block.SIZE;
+                b[1].y += Block.SIZE;
+                b[2].y += Block.SIZE;
+                b[3].y += Block.SIZE;
+                checkMovementCollision();
+            }
+            instantDrop = true;
+            KeyHandler.dropPressed = false;
+        }
 
         if (bottomCollision) {
             collisionTimeMargin = true;
@@ -230,12 +241,15 @@ public class Mino {
         collisionTimeCounter++;
 
         // Wait FPS * 0.5 (120FPS)
-        if (collisionTimeCounter == 120) {
+        if (collisionTimeCounter == 120 || instantDrop) {
             collisionTimeCounter = 0;
             // Check if the piece still touches something.
             checkMovementCollision();
             if (bottomCollision) {
                 active = false;
+            }
+            if (instantDrop) {
+                instantDrop = false;
             }
         }
     }

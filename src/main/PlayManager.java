@@ -24,8 +24,19 @@ public class PlayManager {
     final int MINO_START_Y;
     final int NEXT_MINO_START_X;
     final int NEXT_MINO_START_Y;
+    boolean gameOver;
     Mino currentMino;
     Mino nextMino;
+
+    // Effects
+    boolean effectCounterOn;
+    int effectCounter;
+    ArrayList<Integer> effectY = new ArrayList<>();
+
+    // Score
+    int level = 1;
+    int lines;
+    int score;
 
     public PlayManager() {
 
@@ -76,6 +87,14 @@ public class PlayManager {
             // Move all blocks from the inactive Mino to the staticBlocks Array.
             staticBlocks.addAll(Arrays.asList(currentMino.b).subList(0, 4));
 
+            // Check if game is over.
+            if (currentMino.b[0].x == MINO_START_X && currentMino.b[0].y == MINO_START_Y) {
+                // If both x- and y-coordinates of the currentMino couldn't move at all then the Mino
+                // must be colliding immediately at the starting position which means that it's
+                // x- and y-coordinates are the same as the coordinates from nextMino.
+                gameOver = true;
+            }
+
             currentMino.collisionTimeMargin = false;
 
             // Replace currentMino with nextMino
@@ -93,6 +112,7 @@ public class PlayManager {
         int x = left_x;
         int y = top_y;
         int blockCount = 0;
+        int lineCount = 0;
 
         while (x < right_x && y < bottom_y) {
 
@@ -105,14 +125,29 @@ public class PlayManager {
             x += Block.SIZE;
 
             if (x == right_x) {
-
                 // If the blockCount reaches 12 which is the maximum number of Blocks that can be in 1 Row.
                 // Then delete that row.
                 if (blockCount == 12) {
+
+                    effectCounterOn = true;
+                    effectY.add(y);
+
                     for (int i = staticBlocks.size() - 1; i > -1; i--) {
                         // Remove all Blocks in current y-Line
                         if (staticBlocks.get(i).y == y) {
                             staticBlocks.remove(i);
+                        }
+                    }
+
+                    lineCount++;
+                    lines++;
+                    // Add difficulty increase through faster drop speeds if the Score reaches a certain value
+                    if (lines % 10 == 0 && dropInterval > 1) {
+                        level++;
+                        if (dropInterval > 40) {
+                            dropInterval -= 40;
+                        } else {
+                            dropInterval -= 4;
                         }
                     }
 
@@ -128,6 +163,12 @@ public class PlayManager {
                 x = left_x;
                 y += Block.SIZE;
             }
+        }
+
+        // Add Score
+        if (lineCount > 0) {
+            int singleLineScore = 10 * level;
+            score += singleLineScore * lineCount;
         }
     }
 
@@ -145,6 +186,16 @@ public class PlayManager {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2.drawString("NEXT", x + 60, y + 60);
 
+        // Draw Score-Area
+        g2.drawRect(x, top_y, 250, 300);
+        x += 40;
+        y = top_y + 90;
+        g2.drawString("LEVEL: " + level, x, y);
+        y += 70;
+        g2.drawString("LINES: " + lines, x, y);
+        y += 70;
+        g2.drawString("SCORE: " + score, x, y);
+
         // Render currentMino
         if (currentMino != null) {
             currentMino.draw(g2);
@@ -158,13 +209,40 @@ public class PlayManager {
             staticBlock.draw(g2);
         }
 
-        // Render Pause-Screen
+        // Draw effect
+        if (effectCounterOn) {
+            effectCounter++;
+
+            g2.setColor(Color.WHITE);
+            for (Integer integer : effectY) {
+                g2.fillRect(left_x, integer, WIDTH, Block.SIZE);
+            }
+
+            if (effectCounter == 40) {
+                effectCounterOn = false;
+                effectCounter = 0;
+                effectY.clear();
+            }
+        }
+
+        // Render Pause- or GameOver-Screen
         g2.setColor(Color.YELLOW);
         g2.setFont(g2.getFont().deriveFont(50f));
-        if (KeyHandler.pausePressed) {
+        if (gameOver) {
+            x = left_x + 35;
+            y = top_y + 320;
+            g2.drawString("GAME OVER", x, y);
+        } else if (KeyHandler.pausePressed) {
             x = left_x + 85;
             y = top_y + 320;
             g2.drawString("PAUSED", x, y);
         }
+
+        // Draw Game Title
+        x = 35;
+        y = top_y + 320;
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("DDOG", Font.ITALIC, 60));
+        g2.drawString("YATA'S TETRIS", x, y);
     }
 }
